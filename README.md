@@ -15,18 +15,27 @@
 
 We introduce **Emu3**, a new suite of state-of-the-art multimodal models trained solely with **<i>next-token prediction</i>**! By tokenizing images, text, and videos into a discrete space, we train a single transformer from scratch on a mixture of multimodal sequences.
 
-#### Highlights
-- **Emu3** excels in generating high-quality images with inherent support for flexible resolutions and diverse styles, surpassing state-of-the-art open-source text2image models such as SDXL.
-- **Emu3** demonstrates strong text-to-video generation by causally predicting video sequences from text input.
-- **Emu3** can naturally extend the video and predict what will happen next.
-- **Emu3** exhibits strong vision-language understanding capabilities across various tasks, outperforming flagship models such as LLaVA-1.6.
-
-
-### Emu3 outperforms in both generation and perception tasks
+### Emu3 excels in both generation and perception
+**Emu3** outperforms several well-established task-specific models in both generation and perception tasks, surpassing flagship open models such as SDXL, LLaVA-1.6 and OpenSora-1.2, while eliminating the need for diffusion or compositional architectures.
 
 <div align='center'>
 <img src="./assets/comparison.png" class="interpolation-image" alt="comparison." height="80%" width="80%" />
 </div>
+
+#### Highlights
+
+- **Emu3** is capable of generating high-quality images following the text input, by simply predicting the next vision token. The model naturally supports flexible resolutions and styles.
+- **Emu3** shows strong vision-language understanding capabilities to see the physical world and provides coherent text responses. Notably, this capability is achieved without depending on a CLIP and a pretrained LLM.
+- **Emu3** simply generates a video causally by predicting the next token in a video sequence, unlike the video diffusion model as in Sora. With a video in context, Emu3 can also naturally extend the video and predict what will happen next. 
+
+
+### TODO
+
+- [X] Release model weights of tokenizer, Emu3-Chat and Emu3-Gen
+- [X] Release the inference code.
+- [ ] Release the evaluation code.
+- [ ] Release training scripts for pretrain, sft and dpo.
+
 
 ### Setup
 
@@ -49,7 +58,7 @@ pip install -r requirements.txt
 
 ### Quickstart
 
-#### Use 🤗Transformers to run Emu3-Gen
+#### Use 🤗Transformers to run Emu3-Gen for image generation
 ```python
 from PIL import Image
 from transformers import AutoTokenizer, AutoModel, AutoImageProcessor, AutoModelForCausalLM
@@ -133,7 +142,7 @@ for idx, im in enumerate(mm_list):
     im.save(f"result_{idx}.png")
 ```
 
-#### Use 🤗Transformers to run Emu3-Chat
+#### Use 🤗Transformers to run Emu3-Chat for vision-language understanding
 
 ```python
 from PIL import Image
