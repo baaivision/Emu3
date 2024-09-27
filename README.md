@@ -200,7 +200,7 @@ print(processor.batch_decode(outputs, skip_special_tokens=True)[0])
 
 ## Acknowledgement
 
-We thank the great work from [QWen2-VL](https://github.com/QwenLM/Qwen2-VL) and [MoVQGAN](https://github.com/ai-forever/MoVQGAN)
+We thank the great work from [Emu Series](https://github.com/baaivision/Emu), [QWen2-VL](https://github.com/QwenLM/Qwen2-VL) and [MoVQGAN](https://github.com/ai-forever/MoVQGAN)
 
 <!--
 ## Citation
