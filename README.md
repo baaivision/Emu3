@@ -22,7 +22,7 @@ We introduce **Emu3**, a new suite of state-of-the-art multimodal models trained
 <img src="./assets/comparison.png" class="interpolation-image" alt="comparison." height="80%" width="80%" />
 </div>
 
-#### Highlights
+### Highlights
 
 - **Emu3** is capable of generating high-quality images following the text input, by simply predicting the next vision token. The model naturally supports flexible resolutions and styles.
 - **Emu3** shows strong vision-language understanding capabilities to see the physical world and provides coherent text responses. Notably, this capability is achieved without depending on a CLIP and a pretrained LLM.
