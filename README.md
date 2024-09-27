@@ -4,7 +4,7 @@
 
 [Emu3 Team, BAAI](https://www.baai.ac.cn/english.html)
 
-| [Project Page](https://emu.baai.ac.cn) | [Paper](https://arxiv.org/abs/2312.13286) | [🤗HF Models](https://huggingface.co/collections/BAAI/emu3-66f4e64f70850ff358a2e60f) |
+| [Project Page](https://emu.baai.ac.cn) | [Paper](https://emu.baai.ac.cn/Emu3-tech-report.pdf) | [🤗HF Models](https://huggingface.co/collections/BAAI/emu3-66f4e64f70850ff358a2e60f) |
 
 
 </div>
@@ -202,6 +202,7 @@ print(processor.batch_decode(outputs, skip_special_tokens=True)[0])
 
 We thank the great work from [QWen2-VL](https://github.com/QwenLM/Qwen2-VL) and [MoVQGAN](https://github.com/ai-forever/MoVQGAN)
 
+<!--
 ## Citation
 
 If you find Emu3 useful for your research and applications, please consider starring this repository and citing:
@@ -214,3 +215,4 @@ If you find Emu3 useful for your research and applications, please consider star
     year={2023},
 }
 ```
+-->
