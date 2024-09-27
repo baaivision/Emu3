@@ -142,7 +142,6 @@ class Emu3Processor(ProcessorMixin):
                 raise ValueError("Invalid input image. Please provide PIL.Image.Image or List[PIL.Image.Image].")
 
             image_inputs = self.image_processor(image, return_tensors="pt")["pixel_values"]
-            print(image_inputs.shape)
             image_inputs = image_inputs.to(self.vision_tokenizer.device, self.vision_tokenizer.dtype)
             image_tokens = self.vision_tokenizer.encode(image_inputs)
 
