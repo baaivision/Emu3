@@ -1,5 +1,5 @@
 transformers==4.44.0
-tiktokn==0.6.0
+tiktoken==0.6.0
 flash-attn==2.5.7
 torch
 pillow
