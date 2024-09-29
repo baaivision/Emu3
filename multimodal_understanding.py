@@ -19,6 +19,7 @@ model = AutoModelForCausalLM.from_pretrained(
     attn_implementation="flash_attention_2",
     trust_remote_code=True,
 )
+model.eval()
 
 tokenizer = AutoTokenizer.from_pretrained(EMU_HUB, trust_remote_code=True)
 image_processor = AutoImageProcessor.from_pretrained(VQ_HUB, trust_remote_code=True)
