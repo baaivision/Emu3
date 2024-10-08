@@ -4,7 +4,7 @@
 
 [Emu3 Team, BAAI](https://www.baai.ac.cn/english.html)
 
-| [Project Page](https://emu.baai.ac.cn) | [Paper](https://baai-solution.ks3-cn-beijing.ksyuncs.com/emu3/Emu3-tech-report.pdf?KSSAccessKeyId=AKLTgew6Kdg6RsK92QSfB2KLA&Expires=2591406552&Signature=6BvwfLVqvfww26Bhwvk3mG0FrL8%3D) | [🤗HF Models](https://huggingface.co/collections/BAAI/emu3-66f4e64f70850ff358a2e60f) | [Modelscope](https://modelscope.cn/organization/BAAI?tab=model) | [Demo](https://huggingface.co/spaces/BAAI/Emu3) |
+| [Project Page](https://emu.baai.ac.cn) | [Paper](https://arxiv.org/pdf/2409.18869) | [🤗HF Models](https://huggingface.co/collections/BAAI/emu3-66f4e64f70850ff358a2e60f) | [Modelscope](https://modelscope.cn/organization/BAAI?tab=model) | [Demo](https://huggingface.co/spaces/BAAI/Emu3) |
 
 
 </div>
@@ -259,20 +259,18 @@ for idx, im in enumerate(recon_images):
 
 We thank the great work from [Emu Series](https://github.com/baaivision/Emu), [QWen2-VL](https://github.com/QwenLM/Qwen2-VL) and [MoVQGAN](https://github.com/ai-forever/MoVQGAN)
 
-<!--
 ## Citation
 
 If you find Emu3 useful for your research and applications, please consider starring this repository and citing:
 
 ```
-@article{Emu2,
-    title={Generative Multimodal Models are In-Context Learners}, 
-    author={Quan Sun and Yufeng Cui and Xiaosong Zhang and Fan Zhang and Qiying Yu and Zhengxiong Luo and Yueze Wang and Yongming Rao and Jingjing Liu and Tiejun Huang and Xinlong Wang},
-    publisher={arXiv preprint arXiv:2312.13286},
-    year={2023},
+@article{wang2024emu3,
+  title={Emu3: Next-Token Prediction is All You Need},
+  author={Wang, Xinlong and Zhang, Xiaosong and Luo, Zhengxiong and Sun, Quan and Cui, Yufeng and Wang, Jinsheng and Zhang, Fan and Wang, Yueze and Li, Zhen and Yu, Qiying and others},
+  journal={arXiv preprint arXiv:2409.18869},
+  year={2024}
 }
 ```
--->
 
 
 
