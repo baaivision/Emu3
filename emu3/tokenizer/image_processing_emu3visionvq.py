@@ -108,7 +108,7 @@ class Emu3VisionVQImageProcessor(BaseImageProcessor):
             The min pixels of the image to resize the image.
         max_pixels (`int`, *optional*, defaults to `1024 * 1024`):
             The max pixels of the image to resize the image.
-        spatial_factor (`int`, *optional*, defautls to 8):
+        spatial_factor (`int`, *optional*, defaults to 8):
             The spatial downsample factor the image will be downsampled in feature extracting phase
     """
 
