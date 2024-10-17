@@ -22,7 +22,7 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 model.eval()
 
-tokenizer = AutoTokenizer.from_pretrained(EMU_HUB, trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained(EMU_HUB, trust_remote_code=True, padding_side="left")
 image_processor = AutoImageProcessor.from_pretrained(VQ_HUB, trust_remote_code=True)
 image_tokenizer = AutoModel.from_pretrained(VQ_HUB, device_map="cuda:0", trust_remote_code=True).eval()
 processor = Emu3Processor(image_processor, image_tokenizer, tokenizer)
@@ -32,17 +32,18 @@ POSITIVE_PROMPT = " masterpiece, film grained, best quality."
 NEGATIVE_PROMPT = "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry."
 
 classifier_free_guidance = 3.0
-prompt = "a portrait of young girl."
-prompt += POSITIVE_PROMPT
+prompt = ["a portrait of young girl.", "a shiba inu"]
+prompt = [p + POSITIVE_PROMPT for p in prompt]
 
 kwargs = dict(
     mode='G',
-    ratio="1:1",
+    ratio=["1:1", "16:9"],
     image_area=model.config.image_area,
     return_tensors="pt",
+    padding=True,
 )
 pos_inputs = processor(text=prompt, **kwargs)
-neg_inputs = processor(text=NEGATIVE_PROMPT, **kwargs)
+neg_inputs = processor(text=[NEGATIVE_PROMPT] * len(prompt), **kwargs)
 
 # prepare hyper parameters
 GENERATION_CONFIG = GenerationConfig(
@@ -54,7 +55,8 @@ GENERATION_CONFIG = GenerationConfig(
     top_k=2048,
 )
 
-h, w = pos_inputs.image_size[0]
+h = pos_inputs.image_size[:, 0]
+w = pos_inputs.image_size[:, 1]
 constrained_fn = processor.build_prefix_constrained_fn(h, w)
 logits_processor = LogitsProcessorList([
     UnbatchedClassifierFreeGuidanceLogitsProcessor(
@@ -72,11 +74,13 @@ logits_processor = LogitsProcessorList([
 outputs = model.generate(
     pos_inputs.input_ids.to("cuda:0"),
     GENERATION_CONFIG,
-    logits_processor=logits_processor
+    logits_processor=logits_processor,
+    attention_mask=pos_inputs.attention_mask.to("cuda:0"),
 )
 
-mm_list = processor.decode(outputs[0])
-for idx, im in enumerate(mm_list):
-    if not isinstance(im, Image.Image):
-        continue
-    im.save(f"result_{idx}.png")
+for idx_i, out in enumerate(outputs):
+    mm_list = processor.decode(out)
+    for idx_j, im in enumerate(mm_list):
+        if not isinstance(im, Image.Image):
+            continue
+        im.save(f"result_{idx_i}_{idx_j}.png")

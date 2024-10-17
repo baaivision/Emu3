@@ -84,7 +84,7 @@ class Emu3Processor(ProcessorMixin):
         image: Optional[Image.Image | List[Image.Image]] = None,
         *,
         mode: str = "G",
-        ratio: str = "1:1",
+        ratio: str | List[str] = "1:1",
         image_area: int = 518400,
         **kwargs,
     ) -> BatchFeature:
@@ -129,8 +129,11 @@ class Emu3Processor(ProcessorMixin):
             if image is not None:
                 raise ValueError("You have to specify only `text` in generation mode")
 
-            if len(text) > 1:
-                raise ValueError("`text` can only be `str` in generation mode")
+            if isinstance(ratio, str):
+                ratio = [ratio] * len(text)
+
+            if len(ratio) != len(text):
+                raise ValueError("ratio number must match text number")
         else:
             if image is None:
                 raise ValueError("Invalid input image. Please provide exactly one PIL.Image.Image per text.")
@@ -165,7 +168,7 @@ class Emu3Processor(ProcessorMixin):
                 )
                 prompt += self.chat_template.format(image_prompt=image_prompt, text_prompt=text_prompt)
             else:
-                h, w = self.calculate_generate_size(ratio, image_area, self.vision_tokenizer.spatial_scale_factor)
+                h, w = self.calculate_generate_size(ratio[idx], image_area, self.vision_tokenizer.spatial_scale_factor)
                 image_prompt = (
                     self.tokenizer.boi_token +
                     self.prefix_template.format(H=h, W=w) +
