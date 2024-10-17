@@ -14,12 +14,14 @@
 # limitations under the License.
 """ Processor class for Emu3. """
 
+from math import ceil
 import re
 from typing import List, Optional, Sequence, Union
 from functools import partial
 
 from PIL import Image
 import torch
+from torch.nn import functional as F
 from transformers.feature_extraction_utils import BatchFeature
 from transformers.image_utils import ImageInput, get_image_size, to_numpy_array
 from transformers.processing_utils import ProcessingKwargs, ProcessorMixin
@@ -73,6 +75,7 @@ class Emu3Processor(ProcessorMixin):
         self.vision_tokenizer = vision_tokenizer
         self.prefix_template = prefix_template
         self.visual_template = visual_template
+        self.vis_tok_spatial_factor = 2 ** (len(self.vision_tokenizer.config.ch_mult) - 1)
 
         super().__init__(image_processor, tokenizer, chat_template=chat_template)
         self.const_helper = self.build_const_helper()
@@ -86,6 +89,7 @@ class Emu3Processor(ProcessorMixin):
         mode: str = "G",
         ratio: str | List[str] = "1:1",
         image_area: int = 518400,
+        padding_image: bool = False,
         **kwargs,
     ) -> BatchFeature:
         """
@@ -106,6 +110,8 @@ class Emu3Processor(ProcessorMixin):
                 the image width-height ratio for generation
             image_area (`int`, *optional*):
                 image area used to calcualte the generated image height and width
+            padding_image (`bool`, *optional*):
+                whether pad images to same size for fast preprocessing if they have different sizes
             return_tensors (`str` or [`~utils.TensorType`], *optional*):
                 If set, will return tensors of a particular framework. Acceptable values are:
                 - `'pt'`: Return PyTorch `torch.Tensor` objects.
@@ -121,10 +127,13 @@ class Emu3Processor(ProcessorMixin):
         if isinstance(text, str):
             text = [text]
 
+        if isinstance(image, Image.Image):
+            image = [image]
+
         if not isinstance(text[0], str):
             raise ValueError("`text` must be string or list of string")
 
-        image_inputs = None
+        image_tokens = None
         if mode == 'G':
             if image is not None:
                 raise ValueError("You have to specify only `text` in generation mode")
@@ -144,10 +153,7 @@ class Emu3Processor(ProcessorMixin):
             if isinstance(image, Sequence) and not isinstance(image[0], Image.Image):
                 raise ValueError("Invalid input image. Please provide PIL.Image.Image or List[PIL.Image.Image].")
 
-            image_inputs = self.image_processor(image, return_tensors="pt")["pixel_values"]
-            image_inputs = image_inputs.to(self.vision_tokenizer.device, self.vision_tokenizer.dtype)
-            image_tokens = self.vision_tokenizer.encode(image_inputs)
-
+            image_tokens = self.tokenize_image(image, padding_image=padding_image)
             if len(text) != len(image_tokens):
                 raise ValueError("number of image must match number of text prompt")
 
@@ -253,6 +259,43 @@ class Emu3Processor(ProcessorMixin):
         th = int(round(h * target_ratio / spatial_scale_factor))
         tw = int(round(w * target_ratio / spatial_scale_factor))
         return th, tw
+
+    def tokenize_image(self, image: List[Image.Image], *, padding_image: bool = False):
+        is_all_same_size, prev_size = True, None
+        for im in image:
+            if prev_size is not None:
+                is_all_same_size &= (prev_size == im.size)
+            prev_size = im.size
+
+        if is_all_same_size:
+            image_inputs = self.image_processor(image, return_tensors="pt")["pixel_values"]
+            image_inputs = image_inputs.to(self.vision_tokenizer.device, self.vision_tokenizer.dtype)
+            image_tokens = self.vision_tokenizer.encode(image_inputs)
+        elif padding_image:
+            image_inputs = [self.image_processor(im, return_tensors="pt")["pixel_values"] for im in image]
+            image_shapes = [im.shape[2:] for im in image_inputs]
+            max_shape = (
+                max([im_shape[0] for im_shape in image_shapes]),
+                max([im_shape[1] for im_shape in image_shapes]),
+            )
+            image_inputs = [
+                F.pad(im_inp, (0, max_shape[1] - im_shape[1], 0, max_shape[0] - im_shape[0]))
+                for im_inp, im_shape in zip(image_inputs, image_shapes)
+            ]
+            image_inputs = torch.cat(image_inputs, dim=0).to(self.vision_tokenizer.device, self.vision_tokenizer.dtype)
+            image_tokens = self.vision_tokenizer.encode(image_inputs)
+            image_tokens = [
+                im_tok[:ceil(im_shape[0] / self.vis_tok_spatial_factor), :ceil(im_shape[1] / self.vis_tok_spatial_factor)]
+                for im_tok, im_shape in zip(image_tokens, image_shapes)
+            ]
+        else:
+            image_tokens = []
+            for im in image:
+                image_input = self.image_processor(im, return_tensors="pt")["pixel_values"]
+                image_input = image_input.to(self.vision_tokenizer.device, self.vision_tokenizer.dtype)
+                image_tokens.append(self.vision_tokenizer.encode(image_input).squeeze(0))
+
+        return image_tokens
 
     def build_const_helper(self):
         (

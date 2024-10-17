@@ -21,20 +21,21 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 model.eval()
 
-tokenizer = AutoTokenizer.from_pretrained(EMU_HUB, trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained(EMU_HUB, trust_remote_code=True, padding_side="left")
 image_processor = AutoImageProcessor.from_pretrained(VQ_HUB, trust_remote_code=True)
 image_tokenizer = AutoModel.from_pretrained(VQ_HUB, device_map="cuda:0", trust_remote_code=True).eval()
 processor = Emu3Processor(image_processor, image_tokenizer, tokenizer)
 
 # prepare input
-text = "Please describe the image"
+text = ["Please describe the image", "Please describe the image"]
 image = Image.open("assets/demo.png")
+image = [image, image]
 
 inputs = processor(
     text=text,
     image=image,
     mode='U',
-    padding_side="left",
+    padding_image=True,
     padding="longest",
     return_tensors="pt",
 )
@@ -46,8 +47,11 @@ GENERATION_CONFIG = GenerationConfig(pad_token_id=tokenizer.pad_token_id, bos_to
 outputs = model.generate(
     inputs.input_ids.to("cuda:0"),
     GENERATION_CONFIG,
-    max_new_tokens=320,
+    max_new_tokens=1024,
+    attention_mask=inputs.attention_mask.to("cuda:0"),
 )
 
 outputs = outputs[:, inputs.input_ids.shape[-1]:]
-print(processor.batch_decode(outputs, skip_special_tokens=True)[0])
+answers = processor.batch_decode(outputs, skip_special_tokens=True)
+for ans in answers:
+    print(ans)

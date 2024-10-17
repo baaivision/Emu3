@@ -40,7 +40,7 @@ kwargs = dict(
     ratio=["1:1", "16:9"],
     image_area=model.config.image_area,
     return_tensors="pt",
-    padding=True,
+    padding="longest",
 )
 pos_inputs = processor(text=prompt, **kwargs)
 neg_inputs = processor(text=[NEGATIVE_PROMPT] * len(prompt), **kwargs)
