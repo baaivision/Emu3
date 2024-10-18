@@ -4,7 +4,7 @@
 
 [Emu3 Team, BAAI](https://www.baai.ac.cn/english.html)
 
-| [Project Page](https://emu.baai.ac.cn) | [Paper](https://arxiv.org/pdf/2409.18869) | [🤗HF Models](https://huggingface.co/collections/BAAI/emu3-66f4e64f70850ff358a2e60f) | [Modelscope](https://modelscope.cn/organization/BAAI?tab=model) | [Demo](https://huggingface.co/spaces/BAAI/Emu3) |
+| [Project Page](https://emu.baai.ac.cn) | [Paper](https://arxiv.org/pdf/2409.18869) | [🤗HF Models](https://huggingface.co/collections/BAAI/emu3-66f4e64f70850ff358a2e60f) | [Modelscope](https://modelscope.cn/organization/BAAI?tab=model) | [Demo](https://huggingface.co/spaces/BAAI/Emu3) | [Replicate API](https://replicate.com/baaivision/emu3-gen) |
 
 
 </div>
