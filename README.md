@@ -34,7 +34,8 @@ We introduce **Emu3**, a new suite of state-of-the-art multimodal models trained
 - [X] Release model weights of tokenizer, Emu3-Chat and Emu3-Gen
 - [X] Release the inference code.
 - [ ] Release the evaluation code.
-- [ ] Release training scripts for pretrain, sft and dpo.
+- [X] Release training scripts for sft.
+- [ ] Release training scripts for pretrain and dpo.
 
 
 ### Setup
