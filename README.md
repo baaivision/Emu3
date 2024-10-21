@@ -279,14 +279,3 @@ If you find Emu3 useful for your research and applications, please consider star
 ```
 
 
-
-## Misc
-
-<div align="center">
-
-[![Stargazers repo roster for @baaivision/Emu3](https://bytecrank.com/nastyox/reporoster/php/stargazersSVG.php?user=baaivision&repo=Emu3)](https://github.com/baaivision/Emu3/stargazers)
-
-
-[![Star History Chart](https://api.star-history.com/svg?repos=baaivision/Emu3&type=Date)](https://star-history.com/#baaivision/Emu3&Date)
-
-</div>
