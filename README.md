@@ -28,6 +28,11 @@ We introduce **Emu3**, a new suite of state-of-the-art multimodal models trained
 - **Emu3** shows strong vision-language understanding capabilities to see the physical world and provides coherent text responses. Notably, this capability is achieved without depending on a CLIP and a pretrained LLM.
 - **Emu3** simply generates a video causally by predicting the next token in a video sequence, unlike the video diffusion model as in Sora. With a video in context, Emu3 can also naturally extend the video and predict what will happen next. 
 
+## News
+- 2024.10 We release the image pretrained model **[Emu3-Stage1](https://huggingface.co/BAAI/Emu3-Stage1)** and the sft scripts. 🔥🔥🔥
+- 2024.9 We relase **[Emu3-Chat](https://huggingface.co/BAAI/Emu3-Chat)** and **[Emu3-Gen](https://huggingface.co/BAAI/Emu3-Gen)** which are post training models separately for vision-language understanding and vision generation.
+- 2024.9 We introduce Emu3, a new suite of state-of-the-art multimodal models trained solely with next-token prediction.
+
 
 ### TODO
 
