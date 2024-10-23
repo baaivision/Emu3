@@ -28,6 +28,11 @@ We introduce **Emu3**, a new suite of state-of-the-art multimodal models trained
 - **Emu3** shows strong vision-language understanding capabilities to see the physical world and provides coherent text responses. Notably, this capability is achieved without depending on a CLIP and a pretrained LLM.
 - **Emu3** simply generates a video causally by predicting the next token in a video sequence, unlike the video diffusion model as in Sora. With a video in context, Emu3 can also naturally extend the video and predict what will happen next. 
 
+## News
+- 2024.10 We release the image pretrained model **[Emu3-Stage1](https://huggingface.co/BAAI/Emu3-Stage1)** and the sft scripts. The model supports image captioning and can generate images at a resolution of 512x512. You can use our training scripts for further instruction tuning for more image generation and perception tasks. 🔥🔥🔥
+- 2024.09 We relase **[Emu3-Chat](https://huggingface.co/BAAI/Emu3-Chat)** and **[Emu3-Gen](https://huggingface.co/BAAI/Emu3-Gen)** which are post training models separately for vision-language understanding and vision generation.
+- 2024.09 We introduce Emu3, a new suite of state-of-the-art multimodal models trained solely with next-token prediction.
+
 
 ### TODO
 
@@ -274,14 +279,3 @@ If you find Emu3 useful for your research and applications, please consider star
 ```
 
 
-
-## Misc
-
-<div align="center">
-
-[![Stargazers repo roster for @baaivision/Emu3](https://bytecrank.com/nastyox/reporoster/php/stargazersSVG.php?user=baaivision&repo=Emu3)](https://github.com/baaivision/Emu3/stargazers)
-
-
-[![Star History Chart](https://api.star-history.com/svg?repos=baaivision/Emu3&type=Date)](https://star-history.com/#baaivision/Emu3&Date)
-
-</div>
