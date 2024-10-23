@@ -52,7 +52,7 @@ chat_model = AutoModelForCausalLM.from_pretrained(
 ).eval()
 
 tokenizer = AutoTokenizer.from_pretrained(
-    EMU_CHAT_HUB, trust_remote_code=True,
+    EMU_CHAT_HUB, trust_remote_code=True, padding_side="left",
 )
 image_processor = AutoImageProcessor.from_pretrained(
     VQ_HUB, trust_remote_code=True,
@@ -100,27 +100,27 @@ def generate_image(prompt):
     torch.cuda.empty_cache()
     gen_model.to(device)
 
-    h, w = pos_inputs.image_size[0]
+    h = pos_inputs.image_size[:, 0]
+    w = pos_inputs.image_size[:, 1]
     constrained_fn = processor.build_prefix_constrained_fn(h, w)
-    logits_processor = LogitsProcessorList(
-        [
-            UnbatchedClassifierFreeGuidanceLogitsProcessor(
-                classifier_free_guidance,
-                gen_model,
-                unconditional_ids=neg_inputs.input_ids.to(device),
-            ),
-            PrefixConstrainedLogitsProcessor(
-                constrained_fn,
-                num_beams=1,
-            ),
-        ]
-    )
+    logits_processor = LogitsProcessorList([
+        UnbatchedClassifierFreeGuidanceLogitsProcessor(
+            classifier_free_guidance,
+            gen_model,
+            unconditional_ids=neg_inputs.input_ids.to(device),
+        ),
+        PrefixConstrainedLogitsProcessor(
+            constrained_fn,
+            num_beams=1,
+        ),
+    ])
 
     # Generate
     outputs = gen_model.generate(
         pos_inputs.input_ids.to(device),
         generation_config=GENERATION_CONFIG,
         logits_processor=logits_processor,
+        attention_mask=pos_inputs.attention_mask.to(device),
     )
 
     mm_list = processor.decode(outputs[0])
@@ -140,7 +140,6 @@ def vision_language_understanding(image, text):
         text=text,
         image=image,
         mode="U",
-        padding_side="left",
         padding="longest",
         return_tensors="pt",
     )
@@ -150,7 +149,7 @@ def vision_language_understanding(image, text):
         pad_token_id=tokenizer.pad_token_id,
         bos_token_id=tokenizer.bos_token_id,
         eos_token_id=tokenizer.eos_token_id,
-        max_new_tokens=512,
+        max_new_tokens=1024,
     )
 
     torch.cuda.empty_cache()
@@ -160,6 +159,7 @@ def vision_language_understanding(image, text):
     outputs = chat_model.generate(
         inputs.input_ids.to(device),
         generation_config=GENERATION_CONFIG,
+        attention_mask=inputs.attention_mask.to(device),
     )
 
     outputs = outputs[:, inputs.input_ids.shape[-1] :]
