@@ -4,7 +4,7 @@
 
 [Emu3 Team, BAAI](https://www.baai.ac.cn/english.html)
 
-| [Project Page](https://emu.baai.ac.cn) | [Paper](https://arxiv.org/pdf/2409.18869) | [🤗HF Models](https://huggingface.co/collections/BAAI/emu3-66f4e64f70850ff358a2e60f) | [Modelscope](https://modelscope.cn/organization/BAAI?tab=model) | [Demo](https://huggingface.co/spaces/BAAI/Emu3) |
+| [Project Page](https://emu.baai.ac.cn) | [Paper](https://arxiv.org/pdf/2409.18869) | [🤗HF Models](https://huggingface.co/collections/BAAI/emu3-66f4e64f70850ff358a2e60f) | [Modelscope](https://modelscope.cn/collections/Emu3-9eacc8668b1043) | [Demo](https://huggingface.co/spaces/BAAI/Emu3) |
 
 
 </div>
@@ -56,15 +56,16 @@ pip install -r requirements.txt
 
 ### Model Weights
 
-| Model name         | HF Weight                                               | Modelscope |
-| ------------------ | ------------------------------------------------------- | -------------------------------------------------------------- |
-| **Emu3-Chat**      | [🤗 HF link](https://huggingface.co/BAAI/Emu3-Chat)     | [Modelscope link](https://modelscope.cn/models/BAAI/Emu3-Chat) |
-| **Emu3-Gen**       | [🤗 HF link](https://huggingface.co/BAAI/Emu3-Gen)      | [Modelscope link](https://modelscope.cn/models/BAAI/Emu3-Gen)  |
-| **Emu3-VisionTokenizer**           | [🤗 HF link](https://huggingface.co/BAAI/Emu3-VisionTokenizer)          | [Modelscope link](https://modelscope.cn/models/BAAI/Emu3-VisionTokenizer) |
+| Model name               | HF Weight                                                      | Modelscope                                                                | Wisemodel                                                               |
+| ------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Emu3-Stage1**          | [🤗 HF link](https://huggingface.co/BAAI/Emu3-Stage1)          | [Modelscope link](https://modelscope.cn/models/BAAI/Emu3-Stage1)          |  |
+| **Emu3-Chat**            | [🤗 HF link](https://huggingface.co/BAAI/Emu3-Chat)            | [Modelscope link](https://modelscope.cn/models/BAAI/Emu3-Chat)            | [Wisemodel link](https://wisemodel.cn/models/BAAI/Emu3-Chat)            |
+| **Emu3-Gen**             | [🤗 HF link](https://huggingface.co/BAAI/Emu3-Gen)             | [Modelscope link](https://modelscope.cn/models/BAAI/Emu3-Gen)             | [Wisemodel link](https://wisemodel.cn/models/BAAI/Emu3-Gen)             |
+| **Emu3-VisionTokenizer** | [🤗 HF link](https://huggingface.co/BAAI/Emu3-VisionTokenizer) | [Modelscope link](https://modelscope.cn/models/BAAI/Emu3-VisionTokenizer) | [Wisemodel link](https://wisemodel.cn/models/BAAI/Emu3-VisionTokenizer) |
 
 ### Quickstart
 
-#### Use 🤗Transformers to run Emu3-Gen for image generation
+#### Use 🤗Transformers to run Emu3-Gen/Stage1 for image generation
 ```python
 from PIL import Image
 from transformers import AutoTokenizer, AutoModel, AutoImageProcessor, AutoModelForCausalLM
@@ -88,7 +89,7 @@ model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code=True,
 )
 
-tokenizer = AutoTokenizer.from_pretrained(EMU_HUB, trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained(EMU_HUB, trust_remote_code=True, padding_side="left")
 image_processor = AutoImageProcessor.from_pretrained(VQ_HUB, trust_remote_code=True)
 image_tokenizer = AutoModel.from_pretrained(VQ_HUB, device_map="cuda:0", trust_remote_code=True).eval()
 processor = Emu3Processor(image_processor, image_tokenizer, tokenizer)
@@ -106,6 +107,7 @@ kwargs = dict(
     ratio="1:1",
     image_area=model.config.image_area,
     return_tensors="pt",
+    padding="longest",
 )
 pos_inputs = processor(text=prompt, **kwargs)
 neg_inputs = processor(text=NEGATIVE_PROMPT, **kwargs)
@@ -120,7 +122,8 @@ GENERATION_CONFIG = GenerationConfig(
     top_k=2048,
 )
 
-h, w = pos_inputs.image_size[0]
+h = pos_inputs.image_size[:, 0]
+w = pos_inputs.image_size[:, 1]
 constrained_fn = processor.build_prefix_constrained_fn(h, w)
 logits_processor = LogitsProcessorList([
     UnbatchedClassifierFreeGuidanceLogitsProcessor(
@@ -148,7 +151,7 @@ for idx, im in enumerate(mm_list):
     im.save(f"result_{idx}.png")
 ```
 
-#### Use 🤗Transformers to run Emu3-Chat for vision-language understanding
+#### Use 🤗Transformers to run Emu3-Chat/Stage1 for vision-language understanding
 
 ```python
 from PIL import Image
@@ -172,7 +175,15 @@ model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code=True,
 )
 
-tokenizer = AutoTokenizer.from_pretrained(EMU_HUB, trust_remote_code=True)
+# used for Emu3-Chat
+tokenizer = AutoTokenizer.from_pretrained(EMU_HUB, trust_remote_code=True, padding_side="left")
+# used for Emu3-Stage1
+# tokenizer = AutoTokenizer.from_pretrained(
+#     EMU_HUB,
+#     trust_remote_code=True,
+#     chat_template="{image_prompt}{text_prompt}",
+#     padding_side="left",
+# )
 image_processor = AutoImageProcessor.from_pretrained(VQ_HUB, trust_remote_code=True)
 image_tokenizer = AutoModel.from_pretrained(VQ_HUB, device_map="cuda:0", trust_remote_code=True).eval()
 processor = Emu3Processor(image_processor, image_tokenizer, tokenizer)
@@ -185,19 +196,22 @@ inputs = processor(
     text=text,
     image=image,
     mode='U',
-    padding_side="left",
-    padding="longest",
     return_tensors="pt",
+    padding="longest",
 )
 
 # prepare hyper parameters
-GENERATION_CONFIG = GenerationConfig(pad_token_id=tokenizer.pad_token_id, bos_token_id=tokenizer.bos_token_id, eos_token_id=tokenizer.eos_token_id)
+GENERATION_CONFIG = GenerationConfig(
+    pad_token_id=tokenizer.pad_token_id,
+    bos_token_id=tokenizer.bos_token_id,
+    eos_token_id=tokenizer.eos_token_id,
+    max_new_tokens=1024,
+)
 
 # generate
 outputs = model.generate(
     inputs.input_ids.to("cuda:0"),
     GENERATION_CONFIG,
-    max_new_tokens=320,
 )
 
 outputs = outputs[:, inputs.input_ids.shape[-1]:]
