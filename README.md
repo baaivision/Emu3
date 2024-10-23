@@ -141,7 +141,8 @@ logits_processor = LogitsProcessorList([
 outputs = model.generate(
     pos_inputs.input_ids.to("cuda:0"),
     GENERATION_CONFIG,
-    logits_processor=logits_processor
+    logits_processor=logits_processor,
+    attention_mask=pos_inputs.attention_mask.to("cuda:0"),
 )
 
 mm_list = processor.decode(outputs[0])
@@ -212,6 +213,7 @@ GENERATION_CONFIG = GenerationConfig(
 outputs = model.generate(
     inputs.input_ids.to("cuda:0"),
     GENERATION_CONFIG,
+    attention_mask=pos_inputs.attention_mask.to("cuda:0"),
 )
 
 outputs = outputs[:, inputs.input_ids.shape[-1]:]
